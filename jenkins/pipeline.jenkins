@@ -30,7 +30,7 @@ pipeline {
             steps {
             sh "ssh root@172.20.7.73 unzip -o esv.zip -d /var/www/esv"
             sh 'ssh root@172.20.7.73 /var/www/esv/jenkins/venv.sh'
-            sh 'ssh root@172.20.7.73 /var/www/esv/venv/bin/python /var/www/esv/core/manage.py collectstatic --noinput'
+            sh 'ssh root@172.20.7.73 /var/www/esv/venv/bin/python /var/www/esv/backend/manage.py collectstatic --noinput'
             }
         }
         stage('reatrt NGINX and Gungicorn') {
