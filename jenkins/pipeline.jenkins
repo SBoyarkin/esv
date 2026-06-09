@@ -36,7 +36,7 @@ pipeline {
         stage('reatrt NGINX and Gungicorn') {
             steps {
             sh "ssh root@172.20.7.73 systemctl restart nginx"
-            sh "ssh root@172.20.7.73 systemctl restart gunicorn"
+            sh "ssh root@172.20.7.73 systemctl restart esv-gunicorn"
             }
         }
     }
