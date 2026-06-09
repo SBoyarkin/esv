@@ -1,0 +1,48 @@
+#!/usr/bin/env groovy
+pipeline {
+    agent any
+    options {
+    timestamps()
+    }
+    stages {
+        stage('Create venv') {
+            steps {
+            echo '==========START BUILD============'
+            echo "Running ${env.BUILD_ID} on ${env.JENKINS_URL}"
+            sh 'chmod +x jenkins/venv.sh'
+            sh 'pwd'
+            sh 'zip -r esv  . '
+            }
+        }
+
+        stage('Archive') {
+            steps {
+                // Архивируем собранные файлы
+                archiveArtifacts artifacts: '*.*', allowEmptyArchive: true
+            }
+        }
+        stage('Copy venv') {
+            steps {
+            sh "scp ~/jobs/esv/builds/${env.BUILD_ID}/archive/esv.zip root@172.20.7.73:/root"
+            }
+        }
+        stage('unzip venv') {
+            steps {
+            sh "ssh root@172.20.7.73 unzip -o esv.zip -d /var/www/esv"
+            sh 'ssh root@172.20.7.73 /var/www/esv/jenkins/venv.sh'
+            sh 'ssh root@172.20.7.73 /var/www/esv/venv/bin/python /var/www/esv/core/manage.py collectstatic --noinput'
+            }
+        }
+        stage('reatrt NGINX and Gungicorn') {
+            steps {
+            sh "ssh root@172.20.7.73 systemctl restart nginx"
+            sh "ssh root@172.20.7.73 systemctl restart gunicorn"
+            }
+        }
+    }
+    post {
+        always {
+            cleanWs()
+        }
+    }
+}
